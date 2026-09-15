@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#123f58" />
+    <meta
+      name="description"
+      content="MARKOS — a transforming mecha flight demo across the painted skies of the Pelagic Islands."
+    />
+    <title>MARKOS — The sky remembers</title>
+    <link rel="canonical" href="https://markos.asfarlab.fun/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="MARKOS" />
+    <meta property="og:title" content="MARKOS — The sky remembers" />
+    <meta
+      property="og:description"
+      content="One machine. Two souls. Transform in midair and fly the painted skies of the Pelagic Islands."
+    />
+    <meta property="og:url" content="https://markos.asfarlab.fun/" />
+    <meta
+      property="og:image"
+      content="https://markos.asfarlab.fun/social/markos-title-v43.jpg"
+    />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="MARKOS — The sky remembers. A white and vermilion jet above a painted blue sea and island arch."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="MARKOS — The sky remembers" />
+    <meta
+      name="twitter:description"
+      content="One machine. Two souls. Find your wings above a world worth protecting."
+    />
+    <meta
+      name="twitter:image"
+      content="https://markos.asfarlab.fun/social/markos-title-v43.jpg"
+    />
+    <meta
+      name="twitter:image:alt"
+      content="MARKOS title and transforming fighter above the painted Pelagic Islands."
+    />
+    <script>
+      window.addEventListener(
+        "error",
+        function (event) {
+          if (
+            !(event.target instanceof HTMLScriptElement) ||
+            event.target.type !== "module"
+          )
+            return;
+          function showStartupError() {
+            const notice = document.getElementById("loading-error");
+            notice.textContent =
+              "The flight program could not load. Reload to retry.";
+            notice.classList.remove("hidden");
+            document.getElementById("loading-retry").classList.remove("hidden");
+          }
+          if (document.readyState === "loading")
+            document.addEventListener("DOMContentLoaded", showStartupError, {
+              once: true,
+            });
+          else showStartupError();
+        },
+        true,
+      );
+    </script>
+    <link rel="icon" href="/icon.svg" />
+  </head>
+  <body class="awaiting-entry">
+    <section
+      id="entry"
+      class="screen entry-screen"
+      aria-labelledby="entry-heading"
+    >
+      <div class="entry-edition">
+        PELAGIC PICTURES <span>VOL. 01 / SUMMER, 0091</span>
+      </div>
+      <div class="entry-copy">
+        <span class="entry-monogram" aria-hidden="true">M<span>／</span></span>
+        <p class="entry-kicker">A MOMENT BEFORE TAKEOFF</p>
+        <h2 id="entry-heading">The sky is waiting.</h2>
+        <p class="entry-description">
+          A little wonder. A wide-open sky.<br />Put on your headphones. We’ll
+          meet you up there.
+        </p>
+        <div
+          id="entry-loading"
+          class="entry-loading"
+          aria-label="Loading flight assets"
+        >
+          <i></i>
+        </div>
+        <p id="entry-status" class="entry-status" role="status">
+          Preparing the aircraft, islands and soundtrack…
+        </p>
+        <button id="enter-sky" class="primary" disabled>
+          <span id="entry-label">Preparing your flight…</span
+          ><span class="button-arrow">↗</span>
+        </button>
+        <p id="entry-hint" class="entry-hint hidden"></p>
+        <button id="enter-silent" class="text-button hidden">
+          Continue without sound
+        </button>
+        <a id="loading-retry" class="text-button hidden" href="/"
+          >Reload and try again</a
+        >
+        <noscript
+          >This flight needs JavaScript. Enable it, then reload to
+          enter.</noscript
+        >
+      </div>
+      <div class="entry-footer">
+        <span>MK–01 / VARIABLE FRAME</span><span>HEADPHONES RECOMMENDED</span>
+      </div>
+    </section>
+    <canvas id="world" aria-label="Markos 3D flight world"></canvas>
+    <div class="film"></div>
+    <header>
+      <a class="wordmark" href="/" aria-label="Markos home">M<span>／</span></a>
+      <div class="topline">
+        <span>PELAGIC ISLANDS</span><span>SUMMER, 0091</span>
+      </div>
+      <button
+        id="camera-cycle"
+        class="camera-button"
+        aria-label="Cycle camera"
+        title="Cycle camera · V / Y"
+      >
+        CHASE
+      </button>
+      <button
+        id="sound"
+        class="icon-button"
+        aria-label="Mute audio"
+        title="Mute audio"
+      >
+        ♪</button
+      ><button
+        id="pause"
+        class="icon-button"
+        aria-label="Pause"
+        title="Pause · Esc"
+      >
+        Ⅱ
+      </button>
+    </header>
+    <main id="title" class="screen title-screen hidden">
+      <div class="edition">
+        <span class="edition-line"></span> AN ORIGINAL FLIGHT DEMO
+        <span>VOL. 01</span>
+      </div>
+      <div class="title-copy">
+        <p class="japanese" lang="ja">蒼穹のマルコス</p>
+        <h1>MARKOS<span class="logo-streak"></span></h1>
+        <p class="tagline">The sky remembers.</p>
+        <p class="intro">
+          One machine. Two souls.<br />Find your wings above a world worth
+          protecting.
+        </p>
+        <div class="start-row">
+          <button id="start" class="primary" disabled>
+            <span id="start-label">Preparing aircraft…</span
+            ><span class="button-arrow">↗</span></button
+          ><button id="title-freeflight" class="text-button" disabled>
+            Free flight</button
+          ><button id="hangar" class="text-button" disabled>
+            Inspect aircraft
+          </button>
+        </div>
+        <p class="device">
+          <span class="device-dot"></span
+          ><span id="device-title"
+            >Controller recommended · Keyboard ready</span
+          >
+        </p>
+      </div>
+      <div class="episode">
+        <span>EPISODE 01</span><strong>A sea of clouds</strong>
+        <p>Reconnaissance / Interception / Return</p>
+      </div>
+      <footer class="title-footer">
+        <span>MK–01 VARIABLE FRAME</span
+        ><span id="audio-status" role="status"
+          >Headphones on. Eyes to the sky.</span
+        ><span>PLAYABLE PROTOTYPE / 2026</span>
+      </footer>
+    </main>
+    <section id="hud" class="hidden" aria-label="Flight instruments">
+      <div class="mission">
+        <span id="mission-kicker">01 / RECONNAISSANCE</span>
+        <h2 id="mission-name">Follow the wind</h2>
+        <p id="mission-hint">Fly through the three navigation gates.</p>
+        <div id="landmark-controls" class="hidden">
+          <button
+            id="landmark-prev"
+            aria-label="Previous landmark"
+            title="Previous landmark · [ / D-pad left"
+          >
+            ‹
+          </button>
+          <span id="landmark-count"></span>
+          <button
+            id="landmark-next"
+            aria-label="Next landmark"
+            title="Next landmark · ] / D-pad right"
+          >
+            ›
+          </button>
+        </div>
+        <div id="progress"><i></i><i></i><i></i></div>
+      </div>
+      <div class="heading">
+        <span>W</span><i></i><span id="bearing">000</span><i></i><span>E</span>
+      </div>
+      <div id="reticle"><i></i><span></span><i></i></div>
+      <div id="target-marker" class="hidden">
+        <span id="target-name">NAV 01</span>
+        <div class="target-box"></div>
+        <i class="target-arrow" aria-hidden="true"></i>
+        <small id="target-direction"></small>
+        <small id="target-distance"></small>
+      </div>
+      <div class="telemetry speed">
+        <span>AIRSPEED</span><strong id="speed">320</strong><small>KM/H</small>
+        <div class="meter"><i id="boost-meter"></i></div>
+        <small id="boost-label">AFTERBURNER</small>
+      </div>
+      <div class="telemetry altitude">
+        <span>ALTITUDE</span><strong id="altitude">084</strong
+        ><small>METERS AGL</small>
+        <div class="alt-ticks">┤<br />┤<br />┤</div>
+        <div id="terrain-cue" class="hidden">
+          <span>TERRAIN AHEAD</span><small id="terrain-range"></small>
+        </div>
+      </div>
+      <div class="craft-status">
+        <span id="mode-label">FIGHTER</span
+        ><strong>MK–01 <small>MARKOS</small></strong>
+        <div class="hull-track"><i id="hull-meter"></i></div>
+        <small id="hull-label">AIRFRAME 100%</small>
+      </div>
+      <div id="radio" class="hidden" aria-live="polite">
+        <span class="radio-bars">▂▆▃▇▅</span>
+        <div>
+          <small id="radio-speaker">LYRA / FLIGHT CONTROL</small>
+          <p id="radio-text"></p>
+        </div>
+      </div>
+      <div id="flight-messages">
+        <div id="notice" aria-live="polite"></div>
+        <div id="transform-status" class="hidden">
+          <span>VARIABLE FRAME</span
+          ><strong id="transform-step">RELEASING WING LOCKS</strong>
+          <div><i id="transform-meter"></i></div>
+        </div>
+      </div>
+      <div class="controls-bar" id="controls-bar">
+        <span><kbd>W A S D</kbd> Steer</span><span><kbd>Shift</kbd> Boost</span
+        ><span><kbd>Space</kbd> Fire</span><span><kbd>F</kbd> Transform</span
+        ><span><kbd>Q E I K</kbd> Look</span><span><kbd>V</kbd> Camera</span
+        ><span><kbd>T</kbd> Track (hold)</span><span><kbd>Esc</kbd> Pause</span>
+      </div>
+      <div class="radar">
+        <canvas
+          id="radar"
+          width="150"
+          height="150"
+          aria-label="Navigation radar"
+        ></canvas
+        ><span>PELAGIC / <b id="kills">0</b> CONTACTS CLEARED</span>
+      </div>
+    </section>
+    <section id="pause-screen" class="screen overlay hidden">
+      <div class="menu">
+        <p class="japanese">A MOMENT ABOVE THE CLOUDS</p>
+        <h2>Flight suspended.</h2>
+        <p id="pause-reason">Take your time. The sky will wait.</p>
+        <button id="resume" class="primary">Resume flight <span>↗</span></button
+        ><button id="restart" class="secondary">Restart sortie</button
+        ><button id="return-title" class="text-button">Return to title</button
+        ><label class="setting"
+          >Camera
+          <select id="camera-style">
+            <option value="0">Chase</option>
+            <option value="1">Wide</option>
+            <option value="2">Close</option>
+            <option value="3">Wingman</option>
+          </select></label
+        ><label class="setting"
+          >Automatically return camera
+          <input id="camera-auto-return" type="checkbox" checked /></label
+        ><label class="setting" for="sensitivity"
+          ><span
+            >Steering sensitivity
+            <output aria-hidden="true" id="sensitivity-value"
+              >1.0×</output
+            ></span
+          >
+          <input
+            id="sensitivity"
+            type="range"
+            min="0.5"
+            max="1.7"
+            step="0.1"
+            value="1" /></label
+        ><label class="setting" for="camera-sensitivity"
+          ><span
+            >Camera sensitivity
+            <output aria-hidden="true" id="camera-sensitivity-value"
+              >1.0×</output
+            ></span
+          >
+          <input
+            id="camera-sensitivity"
+            type="range"
+            min="0.5"
+            max="1.7"
+            step="0.1"
+            value="1" /></label
+        ><label class="setting" for="stick-deadzone"
+          ><span
+            >Stick dead zone
+            <output aria-hidden="true" id="stick-deadzone-value"
+              >15%</output
+            ></span
+          >
+          <input
+            id="stick-deadzone"
+            type="range"
+            min="0.05"
+            max="0.3"
+            step="0.01"
+            value="0.15" /></label
+        ><label class="setting"
+          >Gentle stick response
+          <input id="precision" type="checkbox" checked /></label
+        ><label class="setting"
+          >Invert flight Y-axis
+          <input id="invert" type="checkbox" checked /></label
+        ><label class="setting"
+          >Invert camera Y-axis
+          <input id="invert-camera" type="checkbox" checked /></label
+        ><label class="setting" for="music-volume"
+          ><span
+            >Music
+            <output aria-hidden="true" id="music-volume-value"
+              >45%</output
+            ></span
+          >
+          <input
+            id="music-volume"
+            type="range"
+            min="0"
+            max="1"
+            step="0.05"
+            value="0.45"
+        /></label>
+        <label class="setting" for="analog-finish"
+          ><span
+            >Analog finish
+            <output aria-hidden="true" id="analog-finish-value"
+              >75%</output
+            ></span
+          ><input
+            id="analog-finish"
+            type="range"
+            min="0"
+            max="1"
+            step="0.05"
+            value="0.75"
+        /></label>
+        <p class="setting-note">
+          Analog finish adds soft blur, colour bleed and a faded wash. Set to
+          zero for a clear picture. Gentle response eases small stick movements.
+          Raise the dead zone if your sticks drift. Your settings are saved on
+          this device.
+        </p>
+        <button id="reset-settings" class="text-button">Reset settings</button>
+        <p class="help">
+          Menus: D-pad / left stick chooses · A confirms · B returns<br />
+          Controller: left stick steers · right stick orbits 360°<br />
+          Q/E look sideways · I/K look up/down · R / right-stick click
+          returns<br />RT fires · LT boosts · A transforms · Start pauses<br />Keyboard:
+          W/S climb/dive · A/D turn · F transforms<br />Y / V cycles cameras ·
+          LB/RB / Z/X barrel roll<br />B / Ctrl airbrake · C rear view · M
+          mute<br />Hold controller X / keyboard T to track the objective<br />
+          Free flight: D-pad left/right / [ ] chooses a landmark
+        </p>
+      </div>
+    </section>
+    <section id="result" class="screen overlay hidden">
+      <div class="menu">
+        <p class="japanese" id="result-kicker">
+          PELAGIC ISLANDS / SORTIE COMPLETE
+        </p>
+        <h2 id="result-title">A sky worth<br />coming home to.</h2>
+        <p id="result-body">
+          The carrier is safe. Your wings have earned their rest.
+        </p>
+        <div class="result-stats">
+          <div>
+            <small>FLIGHT TIME</small><strong id="result-time">03:20</strong>
+          </div>
+          <div>
+            <small>DRONES CLEARED</small
+            ><strong id="result-kills">06 / 06</strong>
+          </div>
+          <div>
+            <small>AIRFRAME</small><strong id="result-hull">100%</strong>
+          </div>
+        </div>
+        <button id="again" class="primary">Fly again <span>↗</span></button
+        ><button id="freeflight" class="secondary">
+          Stay in the sky · Free flight
+        </button>
+      </div>
+    </section>
+    <section id="hangar-screen" class="screen hidden">
+      <div class="hangar-copy">
+        <p class="japanese">VARIABLE FRAME / ENGINEERING VIEW</p>
+        <h2>One airframe.<br />Every possibility.</h2>
+        <p>MK–01 Markos</p>
+        <dl>
+          <dt>Configuration</dt>
+          <dd id="hangar-mode">Atmospheric fighter</dd>
+          <dt>Powerplant</dt>
+          <dd>Twin ion turbines</dd>
+          <dt>Frame</dt>
+          <dd>Articulated titanium / ceramic armor</dd>
+          <dt>Transformation</dt>
+          <dd>Four stages · 2.4 seconds</dd>
+        </dl>
+        <button id="hangar-transform" class="primary">
+          Transform <span>F</span></button
+        ><button id="hangar-back" class="secondary">Back to title</button>
+      </div>
+      <p class="hangar-bottom">
+        LIVE AIRFRAME VIEW · RS / Q E to orbit · Wings fold. Engines telescope.
+        Arms deploy.
+      </p>
+    </section>
+    <div id="loading-error" class="hidden" role="alert"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

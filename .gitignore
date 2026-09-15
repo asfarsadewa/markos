@@ -1,0 +1,55 @@
+# Dependencies, build output and local tool state
+node_modules/
+/dist/
+.wrangler/
+.cache/
+.codex/
+.agents/
+.claude/
+.vite/
+coverage/
+*.tsbuildinfo
+*.log
+
+# Credentials and machine-specific configuration
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+.npmrc
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
+service-account*.json
+
+# Private authoring archive, generation receipts and visual review evidence
+/assets/
+/output/
+/RESUME.md
+/DEPLOYMENT.md
+/ART_PIPELINE.md
+/tools/blender/
+/tools/prompts/
+/tools/*.py
+*.blend
+*.blend[0-9]*
+__pycache__/
+*.py[cod]
+
+# Intermediate exports; the GLBs contain their baked paint
+/public/models/*.png
+/public/models/*-report.json
+!/public/models/ocean-coastal-light-report.json
+/public/textures/painted-sky.png
+
+# Editor and OS files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo

@@ -1,0 +1,52 @@
+{
+  "id": "markos_radio",
+  "language": "en-US",
+  "mode": "per_line",
+  "style": "English-language 1990s anime OVA cockpit radio performance. Speak natural fluent English only, never translate. Concise, sincere, confident and warm; understated acting, clear diction, brisk radio-call pacing. No music or sound effects. Speak only the exact transcript; no extra words.",
+  "speakers": [
+    {
+      "name": "Control",
+      "voice": "Leda",
+      "style": "Calm female flight commander."
+    },
+    {
+      "name": "Pilot",
+      "voice": "Orus",
+      "style": "Young adult ace pilot, composed and determined."
+    }
+  ],
+  "lines": [
+    {
+      "speaker": "Control",
+      "text": "Markos, your flight corridor is clear. Enjoy the sky.",
+      "file": "launch.wav",
+      "direction": "A warm clearance from flight control, calm and reassuring. Pronounce Markos as MAR-koss.",
+      "sha256": "250ee54cea556ebfa42f985f92f1a16c8eee481cf940bf4c73d256b5e9f1d152",
+      "durationSeconds": 4.16
+    },
+    {
+      "speaker": "Pilot",
+      "text": "Transformation. Combat configuration, online!",
+      "file": "transform.wav",
+      "direction": "The pilot commits to combat mode: crisp, controlled energy, a firm finish. Keep the line under four seconds.",
+      "sha256": "aede5154aed58d0e5d55daa5ebba740315d8e4a63170193600de45af17a522ec",
+      "durationSeconds": 4.92
+    },
+    {
+      "speaker": "Control",
+      "text": "Hostile drones inbound. Protect the carrier.",
+      "file": "contact.wav",
+      "direction": "An urgent warning, focused and clear rather than panicked.",
+      "sha256": "438dcb27e1ff0d83b844ed0f01014ec6123e2377c128f83ad8517e7b0e138fa2",
+      "durationSeconds": 3.16
+    },
+    {
+      "speaker": "Control",
+      "text": "All threats neutralized. This sky is ours.",
+      "file": "complete.wav",
+      "direction": "Quiet relief and earned confidence after the battle.",
+      "sha256": "94e1802c3c94a8a213c265d1237f9a4ee549b05e8dce78052e911d731c2e5736",
+      "durationSeconds": 4.32
+    }
+  ]
+}

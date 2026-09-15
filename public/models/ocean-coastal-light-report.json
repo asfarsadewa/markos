@@ -1,0 +1,23 @@
+{
+  "source": "assets/blender/archipelago.blend",
+  "image": "ocean-coastal-light.png",
+  "size": [
+    4096,
+    2048
+  ],
+  "distance": 100,
+  "aoSamples": 32,
+  "bakeSamples": 8,
+  "islands": 16,
+  "seaTriangles": 65024,
+  "textureSha256": "544ce3b675eae83468bc1af6a8871eb17b3bac1b83ca82ca816de095f2c60426",
+  "blenderSourceSha256": "a14fae91e203c1769779be88120780b8bddc0ef0b50bd08fe4f4f347bb93c2cc",
+  "inputs": {
+    "public/models/environment-layout.json": "57c1b55d66fe1bacec9ec323468729fed8abe9e825f6a612cef810a93c11aec3",
+    "public/models/painted-ocean.glb": "f393db3855ba12703fa0b2a54913b6cd3810f17b3dbb107a8d8440d1d7973617",
+    "public/models/island-cliffs.glb": "b7b05431da11a409e8a8a1b69d89b3b994cde858c315de0bc3cbf57453033100",
+    "public/models/island-port.glb": "6359aea0001606c936dc04bf4815047fc8dc703dcc9fa34c186668cee946819b",
+    "public/models/island-sanctuary.glb": "2e2eabeb27dbe6ea8e823b8a2585a7751bbb6fed5a80baebc56aae46f70c9933",
+    "public/models/island-waterfall.glb": "3d3c608d9a4cfa4eeb24066d2ace0c3c874a109c83c7dbaaa706460f3c1d5cec"
+  }
+}
