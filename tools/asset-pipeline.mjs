@@ -110,7 +110,17 @@ export async function prepareAssets({
     const source = fs.readFileSync(sourcePath);
     let output = source,
       outputPath = sourcePath;
-    if (compressible(relative)) {
+    if (relative.endsWith(".json")) {
+      // JSON is deployed with LF endings so hashed names match on every platform.
+      const normalized = Buffer.from(
+        source.toString("utf8").replace(/\r/g, ""),
+      );
+      if (!normalized.equals(source)) {
+        output = normalized;
+        outputPath = path.join(cacheDir, `${sha256(normalized)}.json`);
+        fs.writeFileSync(outputPath, normalized);
+      }
+    } else if (compressible(relative)) {
       const key = sha256(source);
       const cached = index[key] && path.join(cacheDir, index[key]);
       if (cached && fs.existsSync(cached)) {

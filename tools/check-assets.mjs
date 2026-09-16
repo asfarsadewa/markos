@@ -76,6 +76,11 @@ const coastal = JSON.parse(
 );
 const coastalImage = fs.readFileSync("public/textures/ocean-coastal-light.png");
 const sha256 = (data) => createHash("sha256").update(data).digest("hex");
+// Text inputs are hashed with LF endings so a CRLF checkout matches the report.
+const inputBytes = (path) =>
+  path.endsWith(".json")
+    ? fs.readFileSync(path, "utf8").replace(/\r/g, "")
+    : fs.readFileSync(path);
 assert.equal(coastalImage.toString("hex", 0, 8), "89504e470d0a1a0a");
 assert.deepEqual(
   [coastalImage.readUInt32BE(16), coastalImage.readUInt32BE(20)],
@@ -88,7 +93,7 @@ assert.equal(
 );
 for (const [path, hash] of Object.entries(coastal.inputs)) {
   assert.equal(
-    sha256(fs.readFileSync(path)),
+    sha256(inputBytes(path)),
     hash,
     "Rebake coastal lighting after changing " + path,
   );
