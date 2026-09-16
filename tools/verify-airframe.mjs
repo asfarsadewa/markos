@@ -1,6 +1,5 @@
 import fs from "node:fs";
 import assert from "node:assert/strict";
-import ts from "typescript";
 import * as T from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
@@ -38,15 +37,7 @@ gltf.scene.traverse((o) => {
 assert.ok(meshes.length > 0);
 const clip = gltf.animations.find((a) => a.name === "Transform");
 fs.mkdirSync("output/verification", { recursive: true });
-fs.writeFileSync(
-  "output/verification/airframe-ink.mjs",
-  ts.transpile(fs.readFileSync("src/airframe-ink.ts", "utf8"), {
-    target: ts.ScriptTarget.ES2022,
-    module: ts.ModuleKind.ES2022,
-  }),
-);
-const { addAirframeInk } =
-  await import("../output/verification/airframe-ink.mjs");
+const { addAirframeInk } = await import("../src/airframe-ink.ts");
 addAirframeInk(gltf.scene);
 for (const mesh of meshes) {
   const contour = gltf.scene.getObjectByName(`${mesh.name} ink contour`);
@@ -117,16 +108,7 @@ for (const mesh of meshes) {
   }
 }
 fs.mkdirSync("output/verification", { recursive: true });
-fs.writeFileSync(
-  "output/verification/camera.mjs",
-  ts.transpile(
-    fs
-      .readFileSync("src/camera.ts", "utf8")
-      .replace("./flight.mjs", "../../src/flight.mjs"),
-    { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ES2022 },
-  ),
-);
-const { FlightCamera } = await import("../output/verification/camera.mjs");
+const { FlightCamera } = await import("../src/camera.ts");
 const position = new T.Vector3(0, 1910, 0),
   forward = new T.Vector3(0, 0, -1),
   up = new T.Vector3(0, 1, 0);

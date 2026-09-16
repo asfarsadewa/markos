@@ -1,7 +1,11 @@
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
 /models/*
-  Cache-Control: public, max-age=0, must-revalidate
+  Cache-Control: public, max-age=31536000, immutable
+/audio/*
+  Cache-Control: public, max-age=31536000, immutable
+/textures/*
+  Cache-Control: public, max-age=31536000, immutable
 /social/*
   Cache-Control: public, max-age=31536000, immutable
 /

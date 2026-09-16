@@ -1,5 +1,5 @@
 import * as T from "three";
-import type { FlightAssets } from "./flight-assets";
+import type { FlightAssets } from "./flight-assets.ts";
 
 /** Expanding fire, painted smoke and sparks instance the existing Blender mesh
  * and cloud paint. No new visible geometry is constructed at runtime. */
@@ -18,7 +18,10 @@ export class CrashEffects {
     water: boolean;
     rotation: number;
   }[] = [];
-  constructor(private assets: FlightAssets) {}
+  private readonly assets: FlightAssets;
+  constructor(assets: FlightAssets) {
+    this.assets = assets;
+  }
   start(point: T.Vector3, normal: T.Vector3, water: boolean) {
     this.clear();
     this.group.position.copy(point);

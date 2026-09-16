@@ -1,6 +1,5 @@
 import fs from "node:fs";
 import assert from "node:assert/strict";
-import ts from "typescript";
 import * as T from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { World } from "./load-verification-world.mjs";
@@ -24,15 +23,7 @@ for (const m of json.meshes) for (const p of m.primitives) delete p.material;
 const gltf = await new GLTFLoader().parseAsync(JSON.stringify(json), "");
 const armor = gltf.scene.getObjectsByProperty("isSkinnedMesh", true);
 for (const mesh of armor) mesh.castShadow = mesh.receiveShadow = true;
-fs.writeFileSync(
-  "output/verification/airframe-ink.mjs",
-  ts.transpile(fs.readFileSync("src/airframe-ink.ts", "utf8"), {
-    target: ts.ScriptTarget.ES2022,
-    module: ts.ModuleKind.ES2022,
-  }),
-);
-const { addAirframeInk } =
-  await import("../output/verification/airframe-ink.mjs");
+const { addAirframeInk } = await import("../src/airframe-ink.ts");
 addAirframeInk(gltf.scene);
 const contours = gltf.scene
   .getObjectsByProperty("isSkinnedMesh", true)

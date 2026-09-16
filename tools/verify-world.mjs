@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import * as T from "three";
 import { world, RADIUS } from "./load-verification-world.mjs";
-import { firstProjectileImpact } from "../src/flight.mjs";
+import { firstProjectileImpact } from "../src/flight.ts";
 const World = world.constructor;
 let samples = 0;
 for (const collider of world.colliders) {
@@ -22,7 +22,7 @@ assert.ok(samples > 300);
 for (const collider of world.colliders) {
   const points = collider.mesh.geometry.attributes.position;
   const indices = collider.mesh.geometry.index;
-  let top = new T.Vector3();
+  const top = new T.Vector3();
   for (let i = 0; i < indices.count; i += 3) {
     const point = new T.Vector3();
     for (let corner = 0; corner < 3; corner++)

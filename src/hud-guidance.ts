@@ -1,4 +1,4 @@
-import { clearGuidancePosition } from "./navigation.mjs";
+import { clearGuidancePosition } from "./navigation.ts";
 
 /** Cache the layout only when HUD panels change size or visibility. */
 export class HudGuidance {
@@ -11,10 +11,9 @@ export class HudGuidance {
   }[] = [];
   private panels: HTMLElement[];
   private readonly observer: ResizeObserver;
-  constructor(
-    private marker: HTMLElement,
-    root: HTMLElement,
-  ) {
+  private readonly marker: HTMLElement;
+  constructor(marker: HTMLElement, root: HTMLElement) {
+    this.marker = marker;
     this.panels = Array.from(
       root.querySelectorAll<HTMLElement>(
         ".mission, .heading, .telemetry, .craft-status, .radar, .controls-bar, #radio, #transform-status, #notice, #terrain-cue",

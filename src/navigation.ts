@@ -1,5 +1,33 @@
+import type { Vec3Like } from "./flight.ts";
+
+export type Marker = {
+  x: number;
+  y: number;
+  behind: boolean;
+  offscreen: boolean;
+  angle: number;
+};
+export type Region = {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+};
+export type GuidancePosition = {
+  x: number;
+  y: number;
+  moved: boolean;
+  visible: boolean;
+  compact: boolean;
+};
+
 /** Match the displayed fisheye image and keep off-screen guidance directional. */
-export function navigationMarker(view, fov, aspect, bend = 0.09) {
+export function navigationMarker(
+  view: Vec3Like,
+  fov: number,
+  aspect: number,
+  bend = 0.09,
+): Marker {
   const behind = view.z >= 0;
   const depth = Math.max(0.001, Math.abs(view.z));
   const focal = 1 / Math.tan((fov * Math.PI) / 360);
@@ -41,14 +69,23 @@ export function navigationMarker(view, fov, aspect, bend = 0.09) {
 
 /** Keep a guidance card clear of fixed instruments without changing its bearing.
  * A displaced target becomes a directional arrow, never a false aim box. */
-export function clearGuidancePosition(marker, width, height, regions) {
+export function clearGuidancePosition(
+  marker: { x: number; y: number },
+  width: number,
+  height: number,
+  regions: Region[],
+): GuidancePosition {
   const gutter = 12;
   const origin = { x: width / 2, y: height / 2 };
   const target = {
     x: (marker.x * 0.5 + 0.5) * width,
     y: (-marker.y * 0.5 + 0.5) * height,
   };
-  const fits = (p, halfWidth, halfHeight) =>
+  const fits = (
+    p: { x: number; y: number },
+    halfWidth: number,
+    halfHeight: number,
+  ) =>
     p.x >= halfWidth + gutter &&
     p.x <= width - halfWidth - gutter &&
     p.y >= halfHeight + gutter &&

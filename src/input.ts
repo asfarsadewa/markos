@@ -1,4 +1,4 @@
-import { stickResponse, clamp } from "./flight.mjs";
+import { stickResponse, clamp } from "./flight.ts";
 export class Input {
   keys = new Set<string>();
   previous = new Set<string>();

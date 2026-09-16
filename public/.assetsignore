@@ -1,2 +1,4 @@
 models/*-report.json
 models/*.png
+textures/painted-sky.png
+audio/voices.json

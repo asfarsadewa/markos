@@ -1,4 +1,4 @@
-import type { Input } from "./input";
+import type { Input } from "./input.ts";
 
 /** Navigate the same visible controls used by mouse and keyboard. */
 export class ControllerMenu {

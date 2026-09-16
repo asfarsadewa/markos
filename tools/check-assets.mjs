@@ -1,7 +1,6 @@
 import fs from "node:fs";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import * as T from "three";
 function glb(path) {
   const b = fs.readFileSync(path);
   assert.equal(b.toString("ascii", 0, 4), "glTF");
@@ -49,7 +48,11 @@ for (const name of [
   assert.ok(fs.statSync("public/audio/" + name).size > 1000);
 const voices = JSON.parse(fs.readFileSync("public/audio/voices.json", "utf8"));
 assert.equal(voices.language, "en-US", "Markos dialogue is English");
-const gameSource = fs.readFileSync("src/main.ts", "utf8");
+const gameSource = fs
+  .readdirSync("src")
+  .filter((name) => name.endsWith(".ts"))
+  .map((name) => fs.readFileSync(`src/${name}`, "utf8"))
+  .join("\n");
 for (const line of voices.lines) {
   assert.ok(
     gameSource.includes(JSON.stringify(line.text)),

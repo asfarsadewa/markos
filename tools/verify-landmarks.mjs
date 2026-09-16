@@ -1,25 +1,14 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import ts from "typescript";
 import { Vector3, PerspectiveCamera } from "three";
 import { world, RADIUS } from "./load-verification-world.mjs";
-import { landmarkGuidance } from "../src/landmarks.mjs";
+import { landmarkGuidance } from "../src/landmarks.ts";
 const layout = JSON.parse(
   fs.readFileSync("public/models/environment-layout.json", "utf8"),
 );
 const report = [];
-fs.writeFileSync(
-  "output/verification/landmark-camera.mjs",
-  ts.transpile(
-    fs
-      .readFileSync("src/camera.ts", "utf8")
-      .replace('"./flight.mjs"', '"../../src/flight.mjs"'),
-    { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ES2022 },
-  ),
-);
 globalThis.matchMedia = () => ({ matches: false });
-const { FlightCamera } =
-  await import("../output/verification/landmark-camera.mjs");
+const { FlightCamera } = await import("../src/camera.ts");
 let cameraViews = 0;
 for (const item of layout.islands) {
   assert.ok(

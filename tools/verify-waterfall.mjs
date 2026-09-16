@@ -1,7 +1,6 @@
 import fs from "node:fs";
 import assert from "node:assert/strict";
 import * as T from "three";
-import ts from "typescript";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 globalThis.ProgressEvent ??= class extends Event {
   constructor(type, values) {
@@ -155,23 +154,7 @@ const report = {
   maxSeamStepDifference,
 };
 fs.mkdirSync("output/verification", { recursive: true });
-fs.writeFileSync(
-  "output/verification/cloud-paint.mjs",
-  ts.transpile(fs.readFileSync("src/cloud-paint.ts", "utf8"), {
-    target: ts.ScriptTarget.ES2022,
-    module: ts.ModuleKind.ES2022,
-  }),
-);
-fs.writeFileSync(
-  "output/verification/water-flow-world.mjs",
-  ts
-    .transpile(fs.readFileSync("src/asset-world.ts", "utf8"), {
-      target: ts.ScriptTarget.ES2022,
-      module: ts.ModuleKind.ES2022,
-    })
-    .replace('"./cloud-paint"', '"./cloud-paint.mjs"'),
-);
-const { World } = await import("../output/verification/water-flow-world.mjs");
+const { World } = await import("../src/asset-world.ts");
 const world = Object.create(World.prototype);
 Object.assign(world, {
   ambientMixers: [mixer],

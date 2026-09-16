@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { navigationMarker, clearGuidancePosition } from "../src/navigation.mjs";
+import { navigationMarker, clearGuidancePosition } from "../src/navigation.ts";
 test("fisheye marker projection matches the rendered lens sampling", () => {
   for (const fov of [50, 55, 67])
     for (const aspect of [4 / 3, 16 / 9, 21 / 9]) {

@@ -1,27 +1,9 @@
 import fs from "node:fs";
-import ts from "typescript";
 import * as T from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
 fs.mkdirSync("output/verification", { recursive: true });
-fs.writeFileSync(
-  "output/verification/cloud-paint.mjs",
-  ts.transpile(fs.readFileSync("src/cloud-paint.ts", "utf8"), {
-    target: ts.ScriptTarget.ES2022,
-    module: ts.ModuleKind.ES2022,
-  }),
-);
-fs.writeFileSync(
-  "output/verification/asset-world.mjs",
-  ts
-    .transpile(fs.readFileSync("src/asset-world.ts", "utf8"), {
-      target: ts.ScriptTarget.ES2022,
-      module: ts.ModuleKind.ES2022,
-    })
-    .replace('"./cloud-paint"', '"./cloud-paint.mjs"'),
-);
-const { World, RADIUS } =
-  await import("../output/verification/asset-world.mjs");
+const { World, RADIUS } = await import("../src/asset-world.ts");
 // Load real exported collision geometry without the renderer or image dependencies.
 const world = Object.create(World.prototype);
 world.colliders = [];

@@ -1,24 +1,9 @@
 import fs from "node:fs";
-import path from "node:path";
-import { pathToFileURL } from "node:url";
 import assert from "node:assert/strict";
-import ts from "typescript";
 import * as T from "three";
 fs.mkdirSync("output/verification", { recursive: true });
-let source = fs
-  .readFileSync("src/camera.ts", "utf8")
-  .replace("./flight.mjs", "../../src/flight.mjs");
-fs.writeFileSync(
-  "output/verification/camera.mjs",
-  ts.transpile(source, {
-    target: ts.ScriptTarget.ES2022,
-    module: ts.ModuleKind.ES2022,
-  }),
-);
 globalThis.matchMedia = () => ({ matches: false });
-const { FlightCamera } = await import(
-  pathToFileURL(path.resolve("output/verification/camera.mjs"))
-);
+const { FlightCamera } = await import("../src/camera.ts");
 const camera = new T.PerspectiveCamera(55, 16 / 9, 0.3, 14000),
   rig = new FlightCamera(camera);
 let look = { x: 0, y: 0 };

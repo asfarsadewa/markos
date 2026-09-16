@@ -14,7 +14,7 @@ The opening screen loads the assets. **Enter the sky** starts the soundtrack thr
 
 ## Run locally
 
-Use Node.js 22.12 or newer and npm.
+Use Node.js 22.18 or newer and npm. Tests and verification tools import the TypeScript sources directly through Node's built-in type stripping.
 
 ```sh
 npm ci
@@ -24,13 +24,17 @@ npm run dev
 Open the Vite URL printed in the terminal, normally `http://localhost:5173`. Runtime models, baked textures, music and English radio recordings are included; no generation API keys or Blender installation are needed to play, build or verify the demo.
 
 ```sh
-npm test          # Fast unit tests
-npm run verify   # Asset, animation, flight, collision and camera checks
-npm run build    # Type-check and build into dist/
-npm run preview  # Serve the production build locally
+npm test             # Fast unit tests
+npm run verify       # Unit tests plus asset, animation, flight, collision and camera checks
+npm run lint         # ESLint
+npm run format       # Prettier (format:check only reports)
+npm run typecheck    # tsc
+npm run build        # Type-check, compress and hash assets, build into dist/
+npm run check-build  # Confirm every deployed asset is hashed and each compressed model matches its export
+npm run preview      # Serve the production build locally
 ```
 
-Verification writes temporary modules and reports under the ignored `output/verification/` directory.
+Verification writes reports under the ignored `output/verification/` directory. The GitHub Actions workflow in `.github/workflows/ci.yml` runs lint, formatting, type-check, verification, build and the build check on Node 22 and 24.
 
 ## Controls
 
@@ -62,10 +66,15 @@ Hard terrain and sea impacts destroy the aircraft. In fully transformed robot mo
 
 ## Project layout
 
-- `src/` — Three.js rendering, flight, camera, combat, menus and sound.
-- `public/` — runtime Blender exports, baked paint, audio and social metadata.
+- `src/main.ts` — the conductor: renderer, loading, mode presentation, flight integration and the frame loop.
+- `src/session.ts`, `src/mission.ts`, `src/combat.ts` — screen flow, objectives and progression, drones and bolts.
+- `src/hud.ts`, `src/effects.ts`, `src/contrail.ts`, `src/settings-panel.ts` — instruments, sparks, vapour trails and the pause-menu bindings.
+- `src/camera.ts`, `src/terrain-contact.ts`, `src/asset-world.ts`, `src/audio.ts`, `src/input.ts` — chase camera, swept collision, the exported world, sound and controls.
+- `src/flight.ts`, `src/navigation.ts`, `src/landmarks.ts`, `src/targeting.ts`, `src/preferences.ts` — pure logic covered by the unit tests.
+- `public/` — canonical runtime Blender exports, baked paint, audio and social metadata.
 - `tests/` — unit tests using Node's test runner.
-- `tools/*.mjs` — checks against the actual exported meshes, rigs and animations.
+- `tools/verify-*.mjs` — checks against the actual exported meshes, rigs and animations; `tools/verify.mjs` runs them all.
+- `tools/asset-pipeline.mjs`, `tools/check-build.mjs` — build-time model compression and hashing, and the gate that checks the result.
 - `docs/ASSETS.md` — art pipeline, included exports and dependency notices.
 - `wrangler.jsonc` — Cloudflare static-asset deployment configuration.
 
@@ -81,7 +90,9 @@ Authenticate Wrangler to the intended Cloudflare account, then run:
 npm run deploy
 ```
 
-This verifies, builds and publishes `dist/`. Credentials belong in your local environment or deployment service's secret settings. The game has no server-side generation calls. `public/.assetsignore` excludes development reports and intermediate paint images from Worker uploads.
+This verifies, builds, checks the build and publishes `dist/`. Credentials belong in your local environment or deployment service's secret settings. The game has no server-side generation calls. `public/.assetsignore` excludes development reports and intermediate paint images from Worker uploads.
+
+The production build compresses the large Blender exports with meshopt and renames every runtime model, sound and texture with a content hash, so `public/_headers` marks them immutable. Collision meshes, the painted ocean and the small effect meshes are copied unchanged because the runtime reads their raw vertex data. Compressed models are cached under the ignored `.cache/assets/` directory; `public/` stays byte-identical to the Blender exports.
 
 ## Demo status
 

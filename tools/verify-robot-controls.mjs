@@ -1,6 +1,5 @@
 import fs from "node:fs";
 import assert from "node:assert/strict";
-import ts from "typescript";
 import * as T from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 globalThis.ProgressEvent ??= class extends Event {
@@ -105,17 +104,7 @@ if (process.argv[3]) {
   );
 }
 fs.mkdirSync("output/verification", { recursive: true });
-fs.writeFileSync(
-  "output/verification/robot-controls.mjs",
-  ts.transpile(
-    fs
-      .readFileSync("src/robot-controls.ts", "utf8")
-      .replace("./flight.mjs", "../../src/flight.mjs"),
-    { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ES2022 },
-  ),
-);
-const { RobotControls } =
-  await import("../output/verification/robot-controls.mjs");
+const { RobotControls } = await import("../src/robot-controls.ts");
 const controls = new RobotControls(gltf.scene, gltf.animations),
   mixer = new T.AnimationMixer(gltf.scene);
 const clip = gltf.animations.find((a) => a.name === "Transform"),
@@ -215,16 +204,7 @@ console.log(
 
 // Project every exported vertex with full bracing and its actual flight bank.
 globalThis.matchMedia = () => ({ matches: false });
-fs.writeFileSync(
-  "output/verification/camera.mjs",
-  ts.transpile(
-    fs
-      .readFileSync("src/camera.ts", "utf8")
-      .replace("./flight.mjs", "../../src/flight.mjs"),
-    { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ES2022 },
-  ),
-);
-const { FlightCamera } = await import("../output/verification/camera.mjs");
+const { FlightCamera } = await import("../src/camera.ts");
 const world = {
   terrainClearance: (p) => p.length() - 1800,
   cameraObstruction: () => null,

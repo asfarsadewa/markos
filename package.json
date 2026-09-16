@@ -8,8 +8,13 @@
     "build": "tsc && vite build",
     "preview": "vite preview --host 0.0.0.0",
     "test": "node --test tests/*.test.mjs",
-    "verify": "npm test && node tools/check-assets.mjs && node tools/verify-camera.mjs && node tools/verify-transform-camera.mjs && node tools/verify-camera-terrain.mjs && node tools/verify-airframe.mjs && node tools/verify-framing.mjs && node tools/verify-exhaust.mjs && node tools/verify-ailerons.mjs && node tools/verify-robot-controls.mjs && node tools/verify-stance.mjs && node tools/verify-airframe-shadow.mjs && node tools/verify-waterfall.mjs && node tools/verify-ocean.mjs && node tools/verify-world.mjs && node tools/verify-crash.mjs && node tools/verify-landmarks.mjs",
-    "deploy": "npm run verify && npm run build && wrangler deploy"
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "verify": "node tools/verify.mjs",
+    "check-build": "node tools/check-build.mjs",
+    "deploy": "npm run verify && npm run build && npm run check-build && wrangler deploy"
   },
   "dependencies": {
     "@fontsource/barlow-condensed": "^5.3.0",
@@ -18,11 +23,22 @@
     "three-mesh-bvh": "^0.9.15"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@gltf-transform/core": "^4.5.0",
+    "@gltf-transform/extensions": "^4.5.0",
+    "@gltf-transform/functions": "^4.5.0",
     "@types/three": "^0.180.0",
+    "eslint": "^10.10.0",
+    "globals": "^17.12.0",
     "happy-dom": "^20.14.5",
+    "meshoptimizer": "^1.2.0",
     "prettier": "^3.9.6",
     "typescript": "^5.9.2",
+    "typescript-eslint": "^8.70.0",
     "vite": "^7.1.7",
     "wrangler": "^4.131.2"
+  },
+  "engines": {
+    "node": ">=22.18"
   }
 }

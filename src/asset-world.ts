@@ -1,8 +1,8 @@
 import * as T from "three";
-import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { assetUrl, createGltfLoader } from "./assets.ts";
 import { clone } from "three/addons/utils/SkeletonUtils.js";
 import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
-import { cloudPaint } from "./cloud-paint";
+import { cloudPaint } from "./cloud-paint.ts";
 export const RADIUS = 1800;
 const Y = new T.Vector3(0, 1, 0);
 export const surface = (x: number, z: number, h = 0) =>
@@ -79,8 +79,8 @@ export class World {
     this.ready = this.load(scene);
   }
   private async load(scene: T.Scene) {
-    const loader = new GLTFLoader();
-    const response = await fetch("/models/environment-layout.json");
+    const loader = createGltfLoader();
+    const response = await fetch(assetUrl("/models/environment-layout.json"));
     if (!response.ok) throw new Error("Blender world layout could not load");
     const layout = (await response.json()) as {
       islands: Placement[];
@@ -90,8 +90,10 @@ export class World {
     const assets = await Promise.all(
       names.map(async (name) => ({
         name,
-        art: await loader.loadAsync(`/models/${name}.glb`),
-        collision: await loader.loadAsync(`/models/${name}-collider.glb`),
+        art: await loader.loadAsync(assetUrl(`/models/${name}.glb`)),
+        collision: await loader.loadAsync(
+          assetUrl(`/models/${name}-collider.glb`),
+        ),
       })),
     );
     for (const placement of layout.islands) {
@@ -150,10 +152,12 @@ export class World {
       });
     }
     const [sky, sea, cloud, coastalLight] = await Promise.all([
-      loader.loadAsync("/models/painted-sky.glb"),
-      loader.loadAsync("/models/painted-ocean.glb"),
-      loader.loadAsync("/models/cloud-bank.glb"),
-      new T.TextureLoader().loadAsync("/textures/ocean-coastal-light.png"),
+      loader.loadAsync(assetUrl("/models/painted-sky.glb")),
+      loader.loadAsync(assetUrl("/models/painted-ocean.glb")),
+      loader.loadAsync(assetUrl("/models/cloud-bank.glb")),
+      new T.TextureLoader().loadAsync(
+        assetUrl("/textures/ocean-coastal-light.png"),
+      ),
     ]);
     // Blender baked the actual island occlusion onto this sea's existing UVs.
     // GLTFLoader uses top-left texture coordinates; match its image orientation.

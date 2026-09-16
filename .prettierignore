@@ -1,0 +1,11 @@
+dist/
+node_modules/
+output/
+.cache/
+.wrangler/
+.claude/
+assets/
+public/
+tools/blender/
+package-lock.json
+*.md

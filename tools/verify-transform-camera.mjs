@@ -1,22 +1,11 @@
 import fs from "node:fs";
 import assert from "node:assert/strict";
-import ts from "typescript";
 import * as T from "three";
-import { advanceTransform } from "../src/flight.mjs";
+import { advanceTransform } from "../src/flight.ts";
 
 fs.mkdirSync("output/verification", { recursive: true });
-fs.writeFileSync(
-  "output/verification/transform-camera.mjs",
-  ts.transpile(
-    fs
-      .readFileSync("src/camera.ts", "utf8")
-      .replace("./flight.mjs", "../../src/flight.mjs"),
-    { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ES2022 },
-  ),
-);
 globalThis.matchMedia = () => ({ matches: false });
-const { FlightCamera } =
-  await import("../output/verification/transform-camera.mjs");
+const { FlightCamera } = await import("../src/camera.ts");
 const pos = new T.Vector3(0, 1910, 0),
   up = new T.Vector3(0, 1, 0),
   forward = new T.Vector3(0, 0, -1);

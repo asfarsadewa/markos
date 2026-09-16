@@ -15,6 +15,26 @@ export type TerrainContact = {
   water: boolean;
 };
 
+// Per-call scratch. The sweep runs once per frame and never re-enters itself.
+const delta = new T.Vector3(),
+  seaNormal = new T.Vector3(),
+  seaPoint = new T.Vector3(),
+  start = new T.Vector3(),
+  end = new T.Vector3(),
+  movement = new T.Vector3(),
+  scale = new T.Vector3(),
+  surface = new T.Vector3(),
+  path = new T.Vector3(),
+  crossing = new T.Vector3(),
+  probe = new T.Vector3(),
+  closest = new T.Vector3(),
+  normal = new T.Vector3(),
+  worldPoint = new T.Vector3(),
+  segment = new T.Line3(),
+  bounds = new T.Box3(),
+  ray = new T.Ray(),
+  normalMatrix = new T.Matrix3();
+
 /** Sweep the airframe's clearance volume through the whole step, including rolls.
  * Collision math only: all terrain triangles come from the Blender exports. */
 export function sweepTerrain(
@@ -24,8 +44,8 @@ export function sweepTerrain(
   seaRadius: number,
   radius = 6,
 ): TerrainContact | null {
-  const delta = to.clone().sub(from),
-    length = delta.length();
+  delta.copy(to).sub(from);
+  const length = delta.length();
   let nearest: TerrainContact | null = null;
   const accept = (
     fraction: number,
@@ -52,37 +72,47 @@ export function sweepTerrain(
   const sea = seaRadius + radius,
     c = from.lengthSq() - sea * sea;
   if (c <= 0) {
-    const normal = from.clone().normalize();
-    accept(0, normal.clone().multiplyScalar(seaRadius), normal, true);
+    seaNormal.copy(from).normalize();
+    accept(
+      0,
+      seaPoint.copy(seaNormal).multiplyScalar(seaRadius),
+      seaNormal,
+      true,
+    );
   } else if (length > 0) {
     const b = from.dot(delta),
       disc = b * b - length * length * c;
     if (disc >= 0) {
       const t = (-b - Math.sqrt(disc)) / (length * length);
-      const normal = from.clone().addScaledVector(delta, t).normalize();
-      accept(t, normal.clone().multiplyScalar(seaRadius), normal, true);
+      seaNormal.copy(from).addScaledVector(delta, t).normalize();
+      accept(
+        t,
+        seaPoint.copy(seaNormal).multiplyScalar(seaRadius),
+        seaNormal,
+        true,
+      );
     }
   }
   for (const collider of colliders) {
     if (from.distanceTo(collider.center) > collider.radius + length + radius)
       continue;
-    const start = from.clone().applyMatrix4(collider.inverse);
-    const end = to.clone().applyMatrix4(collider.inverse);
+    start.copy(from).applyMatrix4(collider.inverse);
+    end.copy(to).applyMatrix4(collider.inverse);
     // Exported placements currently have unit scale. Keep clearance conservative
     // if a future placement uses scale, including a nonuniform one.
-    const scale = new T.Vector3().setFromMatrixScale(collider.mesh.matrixWorld);
+    scale.setFromMatrixScale(collider.mesh.matrixWorld);
     const localRadius = radius / Math.min(scale.x, scale.y, scale.z);
-    const segment = new T.Line3(start, end),
-      movement = end.clone().sub(start);
-    const bounds = new T.Box3()
-      .setFromPoints([start, end])
+    segment.set(start, end);
+    movement.copy(end).sub(start);
+    const movementLength = movement.length();
+    bounds
+      .makeEmpty()
+      .expandByPoint(start)
+      .expandByPoint(end)
       .expandByScalar(localRadius);
-    const ray = new T.Ray(start, movement.clone().normalize());
-    const surface = new T.Vector3(),
-      path = new T.Vector3(),
-      crossing = new T.Vector3();
-    const probe = new T.Vector3(),
-      closest = new T.Vector3();
+    ray.origin.copy(start);
+    ray.direction.copy(movement).normalize();
+    normalMatrix.getNormalMatrix(collider.mesh.matrixWorld);
     (collider.mesh.geometry.boundsTree as MeshBVH).shapecast({
       intersectsBounds: (box) => box.intersectsBox(bounds),
       intersectsTriangle: (triangle) => {
@@ -97,7 +127,7 @@ export function sweepTerrain(
           false,
           crossing,
         );
-        if (face && crossing.distanceTo(start) <= movement.length())
+        if (face && crossing.distanceTo(start) <= movementLength)
           target = segment.closestPointToPointParameter(crossing, true);
         else if (distance > localRadius) return false;
         triangle.closestPointToPoint(start, closest);
@@ -114,19 +144,15 @@ export function sweepTerrain(
           }
         probe.copy(start).addScaledVector(movement, hi);
         triangle.closestPointToPoint(probe, closest);
-        const normal = probe.clone().sub(closest);
+        normal.copy(probe).sub(closest);
         if (normal.lengthSq() < 1e-10) {
           triangle.getNormal(normal);
           if (normal.dot(movement) > 0) normal.negate();
         }
-        normal
-          .normalize()
-          .applyNormalMatrix(
-            new T.Matrix3().getNormalMatrix(collider.mesh.matrixWorld),
-          );
+        normal.normalize().applyNormalMatrix(normalMatrix);
         accept(
           hi,
-          closest.clone().applyMatrix4(collider.mesh.matrixWorld),
+          worldPoint.copy(closest).applyMatrix4(collider.mesh.matrixWorld),
           normal,
           false,
         );

@@ -1,5 +1,5 @@
 import * as T from "three";
-import { damp } from "./flight.mjs";
+import { damp } from "./flight.ts";
 
 /** Apply Blender-authored bracing relative to the current transformation pose. */
 export class RobotControls {

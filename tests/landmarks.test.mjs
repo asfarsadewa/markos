@@ -1,8 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { Vector3 } from "three";
-import { cycleLandmark, landmarkGuidance } from "../src/landmarks.mjs";
-import { navigationMarker } from "../src/navigation.mjs";
+import { cycleLandmark, landmarkGuidance } from "../src/landmarks.ts";
+import { navigationMarker } from "../src/navigation.ts";
 const R = 1800;
 
 test("destination cycling includes unmarked flight and wraps both ways", () => {
@@ -67,22 +67,43 @@ test("far-side guidance stays above the sea in every hemisphere, including antip
   }
 });
 
-
 test("a distant sortie beacon guides along the horizon instead of into the sea", () => {
   const position = new Vector3(0, R + 150, 0);
-  const beacon = new Vector3(0, Math.cos(1.3), -Math.sin(1.3))
-    .multiplyScalar(R + 125);
+  const beacon = new Vector3(0, Math.cos(1.3), -Math.sin(1.3)).multiplyScalar(
+    R + 125,
+  );
   const forward = new Vector3(0, 0, -1);
-  const route = landmarkGuidance(position, { approach: beacon, lookAt: beacon }, forward, R);
+  const route = landmarkGuidance(
+    position,
+    { approach: beacon, lookAt: beacon },
+    forward,
+    R,
+  );
   const chord = beacon.clone().sub(position);
   const direct = navigationMarker(chord, 55, 16 / 9);
-  const guided = navigationMarker(route.point.clone().sub(position), 55, 16 / 9);
+  const guided = navigationMarker(
+    route.point.clone().sub(position),
+    55,
+    16 / 9,
+  );
   assert.equal(route.beyondHorizon, true);
   assert.ok(direct.y < -0.6, "old direct chord points steeply down");
   assert.ok(guided.y >= 0, "route cue stays on or above the horizon");
-  assert.ok(Math.abs(route.distance - Math.hypot(1.3 * R, 25)) < 1e-6, "distance follows the surface route");
+  assert.ok(
+    Math.abs(route.distance - Math.hypot(1.3 * R, 25)) < 1e-6,
+    "distance follows the surface route",
+  );
   const near = beacon.clone().add(new Vector3(0, 30, 20));
-  const approach = landmarkGuidance(near, { approach: beacon, lookAt: beacon }, forward, R);
+  const approach = landmarkGuidance(
+    near,
+    { approach: beacon, lookAt: beacon },
+    forward,
+    R,
+  );
   assert.equal(approach.beyondHorizon, false);
-  assert.equal(approach.point, beacon, "final approach retains the actual rendezvous point");
+  assert.equal(
+    approach.point,
+    beacon,
+    "final approach retains the actual rendezvous point",
+  );
 });

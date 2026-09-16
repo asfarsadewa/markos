@@ -5,7 +5,7 @@ import {
   loadPreferences,
   savePreferences,
   normalizePreferences,
-} from "../src/preferences.mjs";
+} from "../src/preferences.ts";
 
 test("controller and camera choices round-trip without retaining unrelated data", () => {
   let saved = null;

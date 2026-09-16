@@ -1,3 +1,4 @@
+import { assetUrl } from "./assets.ts";
 export class Sound {
   context: AudioContext | null = null;
   master: GainNode | null = null;
@@ -41,10 +42,8 @@ export class Sound {
           ].includes(name)
             ? "wav"
             : "mp3";
-          // Explicit voice revision prevents a cached Indonesian take surviving the English release.
-          const revision = extension === "wav" ? "?v=en-52" : "";
           const response = await fetch(
-            `/audio/${name}.${extension}${revision}`,
+            assetUrl(`/audio/${name}.${extension}`),
             {
               signal: AbortSignal.timeout(30000),
             },

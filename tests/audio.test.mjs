@@ -1,17 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import ts from "typescript";
-
-const source = ts.transpileModule(fs.readFileSync("src/audio.ts", "utf8"), {
-  compilerOptions: {
-    target: ts.ScriptTarget.ES2022,
-    module: ts.ModuleKind.ESNext,
-  },
-}).outputText;
-const { Sound } = await import(
-  `data:text/javascript;base64,${Buffer.from(source).toString("base64")}`
-);
+const { Sound } = await import("../src/audio.ts");
 
 function environment(t, { blocked = false, missing = false } = {}) {
   const state = {
@@ -109,10 +98,10 @@ test("preloading stays silent; the gesture resumes synchronously and repeat unlo
   assert.equal(state.requests.length, 9);
   assert.equal(
     state.requests.filter((url) =>
-      /\/audio\/(launch|transform|contact|complete)\.wav\?v=en-52$/.test(url),
+      /\/audio\/(launch|transform|contact|complete)\.wav$/.test(url),
     ).length,
     4,
-    "All English barks use the new cache revision",
+    "All English barks are requested by their plain asset path",
   );
   assert.equal(state.decoded, 9);
   assert.equal(state.contexts[0].sources.length, 2);

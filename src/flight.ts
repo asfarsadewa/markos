@@ -1,9 +1,17 @@
-export const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
-export const damp = (a, b, k, dt) => a + (b - a) * (1 - Math.exp(-k * dt));
-export function flightProfile(transform, brake, thrust) {
+/** Pure flight, propulsion and ballistics math shared by the game and its tests. */
+export type Vec3Like = { x: number; y: number; z: number };
+export const clamp = (v: number, min: number, max: number) =>
+  Math.max(min, Math.min(max, v));
+export const damp = (a: number, b: number, k: number, dt: number) =>
+  a + (b - a) * (1 - Math.exp(-k * dt));
+export function flightProfile(
+  transform: number,
+  brake: boolean,
+  thrust: number,
+) {
   const t = clamp(transform, 0, 1);
   const blend = t * t * (3 - 2 * t);
-  const mix = (a, b) => a + (b - a) * blend;
+  const mix = (a: number, b: number) => a + (b - a) * blend;
   const cruise = mix(82, 28),
     maximum = mix(185, 85);
   return {
@@ -14,7 +22,12 @@ export function flightProfile(transform, brake, thrust) {
     pitchRate: mix(1.15, 0.75),
   };
 }
-export function advanceAfterburner(energy, recovering, demand, dt) {
+export function advanceAfterburner(
+  energy: number,
+  recovering: boolean,
+  demand: number,
+  dt: number,
+) {
   demand = clamp(demand, 0, 1);
   // Hysteresis prevents alternating powered/unpowered frames at an empty tank.
   if (energy <= 0.005) recovering = true;
@@ -23,25 +36,34 @@ export function advanceAfterburner(energy, recovering, demand, dt) {
   energy = clamp(energy + (thrust > 0 ? -0.22 * thrust : 0.14) * dt, 0, 1);
   return { energy, recovering, thrust };
 }
-export function deadzone(x, y, zone = 0.15) {
+export function deadzone(x: number, y: number, zone = 0.15): [number, number] {
   const length = Math.hypot(x, y);
   if (length <= zone) return [0, 0];
   const magnitude = clamp((length - zone) / (1 - zone), 0, 1);
   return [(x / length) * magnitude, (y / length) * magnitude];
 }
 /** Radial response preserves direction and full travel while easing fine input. */
-export function stickResponse(x, y, zone = 0.15, precision = true) {
+export function stickResponse(
+  x: number,
+  y: number,
+  zone = 0.15,
+  precision = true,
+): [number, number] {
   const [a, b] = deadzone(x, y, zone);
   const magnitude = Math.hypot(a, b);
   const gain = precision ? 0.65 + 0.35 * magnitude * magnitude : 1;
   return [a * gain, b * gain];
 }
-export function advanceTransform(value, target, dt) {
+export function advanceTransform(value: number, target: number, dt: number) {
   return value < target
     ? Math.min(target, value + dt / 2.4)
     : Math.max(target, value - dt / 2.4);
 }
-export function segmentDistance(point, start, end) {
+export function segmentDistance(
+  point: Vec3Like,
+  start: Vec3Like,
+  end: Vec3Like,
+) {
   const dx = end.x - start.x,
     dy = end.y - start.y,
     dz = end.z - start.z;
@@ -64,7 +86,12 @@ export function segmentDistance(point, start, end) {
 }
 
 /** Earliest entry into a target volume, measured along the traveled segment. */
-export function segmentSphereImpact(point, start, end, radius) {
+export function segmentSphereImpact(
+  point: Vec3Like,
+  start: Vec3Like,
+  end: Vec3Like,
+  radius: number,
+): number | null {
   const dx = end.x - start.x,
     dy = end.y - start.y,
     dz = end.z - start.z;
@@ -84,12 +111,12 @@ export function segmentSphereImpact(point, start, end, radius) {
 
 /** A wall wins ties; array order cannot select an aircraft behind a nearer hit. */
 export function firstProjectileImpact(
-  start,
-  end,
-  terrainDistance,
-  targets,
-  radius,
-) {
+  start: Vec3Like,
+  end: Vec3Like,
+  terrainDistance: number | null,
+  targets: Vec3Like[],
+  radius: number,
+): { distance: number; targetIndex: number } | null {
   let distance = terrainDistance ?? Infinity,
     targetIndex = -1;
   for (let index = 0; index < targets.length; index++) {
@@ -103,7 +130,12 @@ export function firstProjectileImpact(
 }
 
 /** Constant-velocity lead, bounded by the projectile's actual lifetime. */
-export function interceptTime(relative, velocity, speed, lifetime = 2.2) {
+export function interceptTime(
+  relative: Vec3Like,
+  velocity: Vec3Like,
+  speed: number,
+  lifetime = 2.2,
+) {
   const a = velocity.x ** 2 + velocity.y ** 2 + velocity.z ** 2 - speed ** 2;
   const b =
     2 *
@@ -111,7 +143,7 @@ export function interceptTime(relative, velocity, speed, lifetime = 2.2) {
       relative.y * velocity.y +
       relative.z * velocity.z);
   const c = relative.x ** 2 + relative.y ** 2 + relative.z ** 2;
-  const roots = [];
+  const roots: number[] = [];
   if (Math.abs(a) < 1e-8) {
     if (Math.abs(b) > 1e-8) roots.push(-c / b);
   } else {

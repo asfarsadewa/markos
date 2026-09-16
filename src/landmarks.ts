@@ -1,12 +1,26 @@
 import { Vector3 } from "three";
 
+export type Destination = { approach: Vector3; lookAt: Vector3 };
+export type Guidance = {
+  point: Vector3;
+  focus: Vector3;
+  distance: number;
+  beyondHorizon: boolean;
+  arrived: boolean;
+};
+
 /** Include an unmarked free-roam choice at -1. */
-export function cycleLandmark(index, step, count) {
+export function cycleLandmark(index: number, step: number, count: number) {
   return ((((index + 1 + step) % (count + 1)) + count + 1) % (count + 1)) - 1;
 }
 
 /** Guide across the sphere without pointing through the sea to far-side art. */
-export function landmarkGuidance(position, destination, forward, radius) {
+export function landmarkGuidance(
+  position: Vector3,
+  destination: Destination,
+  forward: Vector3,
+  radius: number,
+): Guidance {
   const up = position.clone().normalize();
   const endUp = destination.approach.clone().normalize();
   const angle = Math.acos(Math.max(-1, Math.min(1, up.dot(endUp))));

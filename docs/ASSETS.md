@@ -10,6 +10,8 @@ MARKOS uses authored Blender exports for visible geometry. The runtime loads tho
 - Blender-exported navigation gates, exhaust, tracers, contrails and sparks. Crash effects instance existing exported surfaces.
 - Embedded paint textures, the coastal-light texture and its input-hash report. The report is retained because `tools/check-assets.mjs` checks that the bake matches the exported sea, islands and layout.
 
+The files under `public/` are the canonical exports and are what the verification tools read. The production build writes meshopt-compressed, content-hashed copies of the whole-scene art (airframe, islands, carrier, interceptor, sky) into `dist/`; collision meshes, the painted ocean and the effect meshes are deployed unchanged. `tools/check-build.mjs` loads every compressed copy through the same Three.js path as the game and confirms it reproduces the export's geometry, skins and animation clips.
+
 Editable `.blend` files and their packed materials are preserved in the maintainer's local authoring archive. That archive, generation requests/responses, intermediate models, historical authoring scripts and review captures are excluded from this checkout. The included GLBs are sufficient to run and verify the game; this is not a complete source archive for reproducing the original asset-generation process.
 
 ## Production tools

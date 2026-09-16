@@ -1,20 +1,9 @@
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import ts from "typescript";
 import * as T from "three";
 import { world, RADIUS } from "./load-verification-world.mjs";
-for (const name of ["terrain-contact", "crash-effects"])
-  fs.writeFileSync(
-    `output/verification/${name}.mjs`,
-    ts.transpile(fs.readFileSync(`src/${name}.ts`, "utf8"), {
-      target: ts.ScriptTarget.ES2022,
-      module: ts.ModuleKind.ES2022,
-    }),
-  );
 const { sweepTerrain, gentleRobotContact } =
-  await import("../output/verification/terrain-contact.mjs");
-const { CrashEffects } =
-  await import("../output/verification/crash-effects.mjs");
+  await import("../src/terrain-contact.ts");
+const { CrashEffects } = await import("../src/crash-effects.ts");
 let surfaces = 0,
   gentle = 0;
 for (const collider of world.colliders) {
@@ -66,7 +55,7 @@ for (const collider of world.colliders) {
     surfaces++;
   }
   // Highest face is exposed ground, suitable for a controlled descent.
-  let top = new T.Vector3();
+  const top = new T.Vector3();
   for (let i = 0; i < indices.count; i += 3) {
     const p = new T.Vector3();
     for (let j = 0; j < 3; j++)

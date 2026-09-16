@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { Vector3 } from "three";
-import { cameraContact } from "../src/targeting.mjs";
+import { cameraContact } from "../src/targeting.ts";
 const origin = new Vector3();
 const contact = (distance, hp = 3) => ({
   hp,

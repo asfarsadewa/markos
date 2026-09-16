@@ -1,7 +1,7 @@
 import * as T from "three";
-import { damp, clamp } from "./flight.mjs";
-import type { Input } from "./input";
-import type { World } from "./world";
+import { damp, clamp } from "./flight.ts";
+import type { Input } from "./input.ts";
+import type { World } from "./asset-world.ts";
 /** Keep a useful horizontal film gate when the game window becomes narrow. */
 export function fitCameraFov(nominalFov: number, aspect: number) {
   return T.MathUtils.radToDeg(
@@ -12,6 +12,30 @@ export function fitCameraFov(nominalFov: number, aspect: number) {
       ),
   );
 }
+// Per-frame scratch. One rig updates at a time and never re-enters itself.
+const delta = new T.Vector3(),
+  direction = new T.Vector3(),
+  flightUp = new T.Vector3(),
+  right = new T.Vector3(),
+  toward = new T.Vector3(),
+  orbitRight = new T.Vector3(),
+  backward = new T.Vector3(),
+  desired = new T.Vector3(),
+  radial = new T.Vector3(),
+  offset = new T.Vector3(),
+  destination = new T.Vector3(),
+  fromUnit = new T.Vector3(),
+  toUnit = new T.Vector3(),
+  targetUp = new T.Vector3(),
+  aim = new T.Vector3(),
+  turn = new T.Quaternion(),
+  step = new T.Quaternion(),
+  rockOffset = new T.Vector3(),
+  rockDirection = new T.Vector3(),
+  above = new T.Vector3(),
+  across = new T.Vector3(),
+  candidate = new T.Vector3(),
+  previous = new T.Vector3();
 /** Spring chase with a full spherical orbit. Aircraft attitude and camera lag are separate. */
 export class FlightCamera {
   static readonly names = ["CHASE", "WIDE", "CLOSE", "WINGMAN"];
@@ -33,7 +57,10 @@ export class FlightCamera {
   tracking = false;
   private trackingYaw = 0;
   readonly reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  constructor(readonly camera: T.PerspectiveCamera) {}
+  readonly camera: T.PerspectiveCamera;
+  constructor(camera: T.PerspectiveCamera) {
+    this.camera = camera;
+  }
   reset() {
     this.yaw = this.pitch = this.idle = 0;
     this.lastTarget = 0;
@@ -93,7 +120,7 @@ export class FlightCamera {
     this.lastPitch = aircraftPitch;
     // Follow translation directly; damp the orbit offset, avoiding speed-dependent camera drag.
     if (this.lastPosition)
-      camera.position.add(pos.clone().sub(this.lastPosition));
+      camera.position.add(delta.copy(pos).sub(this.lastPosition));
     if (!this.lastPosition) this.lastPosition = pos.clone();
     else this.lastPosition.copy(pos);
     if (transformTarget !== this.lastTarget) {
@@ -120,17 +147,17 @@ export class FlightCamera {
     }
     const orbiting =
       manual || Math.abs(this.yaw) + Math.abs(this.pitch) > 0.025;
-    const direction = forward
-      .clone()
+    direction
+      .copy(forward)
       .multiplyScalar(Math.cos(aircraftPitch))
       .addScaledVector(radialUp, Math.sin(aircraftPitch))
       .normalize();
-    const flightUp = radialUp
-      .clone()
+    flightUp
+      .copy(radialUp)
       .multiplyScalar(Math.cos(aircraftPitch))
       .addScaledVector(forward, -Math.sin(aircraftPitch))
       .normalize();
-    const right = new T.Vector3().crossVectors(direction, flightUp).normalize();
+    right.crossVectors(direction, flightUp).normalize();
     this.tracking =
       !!focus &&
       focus.distanceToSquared(pos) > 4 &&
@@ -139,7 +166,7 @@ export class FlightCamera {
       !input.down("KeyC");
     let trackingPitch = 0;
     if (this.tracking) {
-      const toward = focus!.clone().sub(pos).normalize();
+      toward.copy(focus!).sub(pos).normalize();
       const x = toward.dot(right),
         z = toward.dot(direction);
       // At a vertical crossing, retain the last azimuth instead of choosing
@@ -175,9 +202,9 @@ export class FlightCamera {
       : this.tracking
         ? this.trackingYaw
         : this.yaw + sweep + (wingman ? 0.95 + transform * 1.2 : 0);
-    const orbitRight = right.clone().applyAxisAngle(flightUp, orbitYaw);
-    const backward = direction
-      .clone()
+    orbitRight.copy(right).applyAxisAngle(flightUp, orbitYaw);
+    backward
+      .copy(direction)
       .negate()
       .applyAxisAngle(flightUp, orbitYaw)
       .applyAxisAngle(orbitRight, this.tracking ? trackingPitch : this.pitch);
@@ -197,32 +224,30 @@ export class FlightCamera {
     const distance = this.tracking
       ? Math.max(32 + transform * 4, baseDistance)
       : baseDistance;
-    const desired = pos
-      .clone()
+    desired
+      .copy(pos)
       .addScaledVector(backward, distance)
       .addScaledVector(flightUp, height);
     const clearance = world.terrainClearance(desired);
     if (clearance < 6)
-      desired.addScaledVector(desired.clone().normalize(), 6 - clearance);
+      desired.addScaledVector(radial.copy(desired).normalize(), 6 - clearance);
     const pullInFrontOfRock = (point: T.Vector3) => {
       const hit = world.cameraObstruction(pos, point);
       if (hit === null) return;
-      const offset = point.clone().sub(pos);
+      rockOffset.copy(point).sub(pos);
       // Keep a working shot beside a nearby cliff. Pulling straight toward the
       // aircraft can put the lens inside its wings even though the ray is clear.
-      const radius = offset.length();
+      const radius = rockOffset.length();
       const minimum = Math.min(18, radius);
       if (hit - 2 < minimum) {
-        const direction = offset.clone().normalize();
-        const above = radialUp
-          .clone()
-          .addScaledVector(direction, -radialUp.dot(direction));
+        rockDirection.copy(rockOffset).normalize();
+        above
+          .copy(radialUp)
+          .addScaledVector(rockDirection, -radialUp.dot(rockDirection));
         if (above.lengthSq() < 0.001)
-          above.copy(right).projectOnPlane(direction);
+          above.copy(right).projectOnPlane(rockDirection);
         above.normalize();
-        const across = new T.Vector3()
-          .crossVectors(direction, above)
-          .normalize();
+        across.crossVectors(rockDirection, above).normalize();
         const clearCandidate = (candidate: T.Vector3) => {
           if (candidate.distanceTo(pos) < minimum - 0.001) return false;
           const obstruction = world.cameraObstruction(pos, candidate);
@@ -233,11 +258,7 @@ export class FlightCamera {
         };
         // Retain the previous clear angle while the obstruction persists. This
         // prevents neighboring rock faces from repeatedly swapping shoulders.
-        const previous = camera.position
-          .clone()
-          .sub(pos)
-          .setLength(radius)
-          .add(pos);
+        previous.copy(camera.position).sub(pos).setLength(radius).add(pos);
         if (clearCandidate(previous)) {
           point.copy(previous);
           return;
@@ -251,8 +272,8 @@ export class FlightCamera {
             -Math.PI / 2,
             Math.PI,
           ]) {
-            const candidate = direction
-              .clone()
+            candidate
+              .copy(rockDirection)
               .multiplyScalar(Math.cos(angle))
               .addScaledVector(above, Math.sin(angle) * Math.cos(azimuth))
               .addScaledVector(across, Math.sin(angle) * Math.sin(azimuth))
@@ -267,22 +288,22 @@ export class FlightCamera {
       }
       point
         .copy(pos)
-        .addScaledVector(offset.normalize(), Math.max(0.05, hit - 2));
+        .addScaledVector(rockOffset.normalize(), Math.max(0.05, hit - 2));
     };
     pullInFrontOfRock(desired);
     // Interpolate around the aircraft, not along a chord through it. A quick
     // return from the front hemisphere must keep its working camera distance.
     const follow = 1 - Math.exp(-(this.centering ? 8 : manual ? 6 : 3.6) * dt);
-    const offset = camera.position.clone().sub(pos);
-    const destination = desired.clone().sub(pos);
+    offset.copy(camera.position).sub(pos);
+    destination.copy(desired).sub(pos);
     const radius = offset.length(),
       desiredRadius = destination.length();
     if (radius > 0.001 && desiredRadius > 0.001) {
-      const turn = new T.Quaternion().setFromUnitVectors(
-        offset.clone().divideScalar(radius),
-        destination.clone().divideScalar(desiredRadius),
+      turn.setFromUnitVectors(
+        fromUnit.copy(offset).divideScalar(radius),
+        toUnit.copy(destination).divideScalar(desiredRadius),
       );
-      offset.applyQuaternion(new T.Quaternion().slerp(turn, follow));
+      offset.applyQuaternion(step.identity().slerp(turn, follow));
       offset.setLength(T.MathUtils.lerp(radius, desiredRadius, follow));
       camera.position.copy(pos).add(offset);
     } else camera.position.lerp(desired, follow);
@@ -290,12 +311,12 @@ export class FlightCamera {
     const actualClearance = world.terrainClearance(camera.position);
     if (actualClearance < 5)
       camera.position.addScaledVector(
-        camera.position.clone().normalize(),
+        radial.copy(camera.position).normalize(),
         5 - actualClearance,
       );
     pullInFrontOfRock(camera.position);
-    const targetUp = flightUp
-      .clone()
+    targetUp
+      .copy(flightUp)
       .applyAxisAngle(direction, bank * (this.reduced ? 0 : 0.16));
     camera.up.lerp(targetUp, 1 - Math.exp(-3.5 * dt)).normalize();
     const focusScale = Math.min(
@@ -336,8 +357,8 @@ export class FlightCamera {
     );
     if (focusScale < 0.8)
       this.aimSide = clamp(this.aimSide, -3 * focusScale, 3 * focusScale);
-    const aim = pos
-      .clone()
+    aim
+      .copy(pos)
       .addScaledVector(direction, this.aimAhead)
       .addScaledVector(flightUp, this.aimHeight)
       .addScaledVector(right, this.aimSide);

@@ -1,29 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import { pathToFileURL } from "node:url";
-import ts from "typescript";
 import { Window } from "happy-dom";
 
-async function sourceModule(name) {
-  const source = fs.readFileSync(`src/${name}.ts`, "utf8");
-  const js = ts
-    .transpileModule(source, {
-      compilerOptions: {
-        target: ts.ScriptTarget.ES2022,
-        module: ts.ModuleKind.ESNext,
-      },
-    })
-    .outputText.replace(
-      '"./flight.mjs"',
-      JSON.stringify(pathToFileURL(`${process.cwd()}/src/flight.mjs`).href),
-    );
-  return import(
-    `data:text/javascript;base64,${Buffer.from(js).toString("base64")}`
-  );
-}
-const { Input } = await sourceModule("input");
-const { ControllerMenu } = await sourceModule("controller-menu");
+const { Input } = await import("../src/input.ts");
+const { ControllerMenu } = await import("../src/controller-menu.ts");
 
 function setup(markup) {
   const window = new Window();

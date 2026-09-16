@@ -1,20 +1,10 @@
 import fs from "node:fs";
 import assert from "node:assert/strict";
-import ts from "typescript";
 import * as T from "three";
 import { world } from "./load-verification-world.mjs";
 
 globalThis.matchMedia = () => ({ matches: false });
-fs.writeFileSync(
-  "output/verification/camera.mjs",
-  ts.transpile(
-    fs
-      .readFileSync("src/camera.ts", "utf8")
-      .replace("./flight.mjs", "../../src/flight.mjs"),
-    { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ES2022 },
-  ),
-);
-const { FlightCamera } = await import("../output/verification/camera.mjs");
+const { FlightCamera } = await import("../src/camera.ts");
 const arch = world.colliders.find((c) => c.name === "Sanctuary Arch");
 const input = { look: { x: 0, y: 0 }, down: () => false };
 const results = [];

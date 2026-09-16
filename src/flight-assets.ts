@@ -1,12 +1,13 @@
 import * as T from "three";
-import { GLTFLoader, type GLTF } from "three/addons/loaders/GLTFLoader.js";
+import type { GLTF } from "three/addons/loaders/GLTFLoader.js";
+import { assetUrl, createGltfLoader } from "./assets.ts";
 export type FlightAssets = {
   drone: GLTF;
   geometry: Record<string, T.BufferGeometry>;
   cloud: T.Texture;
 };
 export async function loadFlightAssets(): Promise<FlightAssets> {
-  const loader = new GLTFLoader();
+  const loader = createGltfLoader();
   const names = [
     "nav-gate",
     "exhaust",
@@ -17,7 +18,7 @@ export async function loadFlightAssets(): Promise<FlightAssets> {
   ];
   const [drone, ...effects] = await Promise.all(
     ["interceptor", ...names].map((name) =>
-      loader.loadAsync(`/models/${name}.glb`),
+      loader.loadAsync(assetUrl(`/models/${name}.glb`)),
     ),
   );
   const geometry: Record<string, T.BufferGeometry> = {};

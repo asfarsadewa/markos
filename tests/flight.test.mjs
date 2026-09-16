@@ -11,7 +11,7 @@ import {
   flightProfile,
   advanceAfterburner,
   interceptTime,
-} from "../src/flight.mjs";
+} from "../src/flight.ts";
 test("projectiles resolve the earliest surface or target instead of passing through cover", () => {
   const start = { x: 0, y: 0, z: 0 },
     end = { x: 0, y: 0, z: 30 };
